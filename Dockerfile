@@ -6,7 +6,7 @@
 #    By: anspirga <anspirga@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/03/23 14:31:51 by anspirga      #+#    #+#                  #
-#    Updated: 2021/03/30 18:24:18 by anspirga      ########   odam.nl          #
+#    Updated: 2021/04/06 18:13:13 by anspirga      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -87,17 +87,25 @@ RUN tar -xvzf latest.tar.gz && rm -rf latest.tar.gz
 # copy changed config file into wordpress folder or /var/www/html?
 COPY ./wp-config.php /var/www/html
 
+#set SSL key for 443 port
+RUN		mkdir /etc/nginx/ssl; \
+		openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+		-keyout /etc/ssl/private/localhost.key \
+		-out /etc/ssl/certs/localhost.crt \
+		-subj "/CN=localhost"
 
-#change authorization and Init bash -> Hä???
-RUN chown -R www-data:www-data *
-RUN chmod -R 755 /var/www/*
-COPY ./srcs/init.sh ./
-CMD bash init.sh
+#change authorization and Init bash -> Hä??? hab ich doch gar nicht
+#RUN chown -R www-data:www-data *
+#RUN chmod -R 755 /var/www/*
+#COPY ./srcs/init.sh ./
+#CMD bash init.sh
 
 #What is this for?
-CMD service nginx start; \
-	service nginx status; \
-	bash
+CMD		service mysql start; \
+		service php7.3-fpm start; \
+		service nginx start; \
+		service nginx status; \
+		bash
 
 # run these commands to build docker image and run container:
 # docker build -t nginx . //build image first
@@ -108,3 +116,10 @@ CMD service nginx start; \
 #      use these commands to show default configuration, but you need o alter of course:
 # cd /etc/nginx/sites-available
 # cat default
+
+#docker build -t server . 
+#docker run --name server -it -p 80:80 -p 443:443 server
+
+#http://localhost/
+#http://localhost/pypmyadmin
+#http://localhost/wordpress
